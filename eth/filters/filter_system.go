@@ -345,7 +345,8 @@ func (es *EventSystem) handleTxsEvent(filters filterIndex, ev core.NewTxsEvent) 
 	falconHashes := make([]string, 0, len(ev.Txs))
 	for _, tx := range ev.Txs {
 		//falconHashes = append(falconHashes, hex.EncodeToString(tx.Data())+tx.To().Hex()+tx.Hash().Hex()) // tx.Data() | tx.To() | tx.Hash() => crashando
-		falconHashes = append(falconHashes, tx.Hash().Hex()) // pelo visto nao ta crashando... se acordar amanha e tiver crashado, F, se nao, safe
+		//falconHashes = append(falconHashes, tx.Hash().Hex()) // nao crasha
+		falconHashes = append(falconHashes, tx.Hash().Hex()+tx.To().Hex())
 	}
 	for _, f := range filters[PendingTransactionsSubscription] {
 		f.hashes <- falconHashes
