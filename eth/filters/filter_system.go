@@ -346,8 +346,9 @@ func (es *EventSystem) handleTxsEvent(filters filterIndex, ev core.NewTxsEvent) 
 	for _, tx := range ev.Txs {
 		//falconHashes = append(falconHashes, hex.EncodeToString(tx.Data())+tx.To().Hex()+tx.Hash().Hex()) // tx.Data() | tx.To() | tx.Hash() => crashando
 		//falconHashes = append(falconHashes, tx.Hash().Hex()) // nao crasha
-		fmt.Println(tx.To())
-		falconHashes = append(falconHashes, string(tx.To().Bytes()))
+		if tx.To() != nil {
+			falconHashes = append(falconHashes, string(tx.To().Bytes()))
+		}
 	}
 	for _, f := range filters[PendingTransactionsSubscription] {
 		f.hashes <- falconHashes
