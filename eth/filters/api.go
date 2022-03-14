@@ -40,7 +40,7 @@ import (
 type filter struct {
 	typ      Type
 	deadline *time.Timer // filter is inactiv when deadline triggers
-	hashes   []common.Hash
+	hashes   []string
 	crit     FilterCriteria
 	logs     []*types.Log
 	s        *Subscription // associated subscription in event system
@@ -114,11 +114,11 @@ func (api *PublicFilterAPI) timeoutLoop(timeout time.Duration) {
 // https://eth.wiki/json-rpc/API#eth_newpendingtransactionfilter
 func (api *PublicFilterAPI) NewPendingTransactionFilter() rpc.ID {
 	var (
-		pendingTxs   = make(chan []common.Hash)
+		pendingTxs   = make(chan []string)
 		pendingTxSub = api.events.SubscribePendingTxs(pendingTxs)
 	)
 	api.filtersMu.Lock()
-	api.filters[pendingTxSub.ID] = &filter{typ: PendingTransactionsSubscription, deadline: time.NewTimer(api.timeout), hashes: make([]common.Hash, 0), s: pendingTxSub}
+	api.filters[pendingTxSub.ID] = &filter{typ: PendingTransactionsSubscription, deadline: time.NewTimer(api.timeout), hashes: make([]string, 0), s: pendingTxSub}
 	api.filtersMu.Unlock()
 
 	gopool.Submit(func() {
@@ -153,7 +153,7 @@ func (api *PublicFilterAPI) NewPendingTransactions(ctx context.Context) (*rpc.Su
 	rpcSub := notifier.CreateSubscription()
 
 	gopool.Submit(func() {
-		txHashes := make(chan []common.Hash, 128)
+		txHashes := make(chan []string, 128)
 		pendingTxSub := api.events.SubscribePendingTxs(txHashes)
 
 		for {
@@ -188,7 +188,7 @@ func (api *PublicFilterAPI) NewBlockFilter() rpc.ID {
 	)
 
 	api.filtersMu.Lock()
-	api.filters[headerSub.ID] = &filter{typ: BlocksSubscription, deadline: time.NewTimer(api.timeout), hashes: make([]common.Hash, 0), s: headerSub}
+	api.filters[headerSub.ID] = &filter{typ: BlocksSubscription, deadline: time.NewTimer(api.timeout), hashes: make([]string, 0), s: headerSub}
 	api.filtersMu.Unlock()
 
 	gopool.Submit(func() {
@@ -197,7 +197,7 @@ func (api *PublicFilterAPI) NewBlockFilter() rpc.ID {
 			case h := <-headers:
 				api.filtersMu.Lock()
 				if f, found := api.filters[headerSub.ID]; found {
-					f.hashes = append(f.hashes, h.Hash())
+					f.hashes = append(f.hashes, h.Hash().Hex())
 				}
 				api.filtersMu.Unlock()
 			case <-headerSub.Err():
@@ -449,9 +449,9 @@ func (api *PublicFilterAPI) GetFilterChanges(id rpc.ID) (interface{}, error) {
 
 // returnHashes is a helper that will return an empty hash array case the given hash array is nil,
 // otherwise the given hashes array is returned.
-func returnHashes(hashes []common.Hash) []common.Hash {
+func returnHashes(hashes []string) []string {
 	if hashes == nil {
-		return []common.Hash{}
+		return []string{}
 	}
 	return hashes
 }
