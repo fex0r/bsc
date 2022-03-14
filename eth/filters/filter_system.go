@@ -345,8 +345,7 @@ func (es *EventSystem) handleRemovedLogs(filters filterIndex, ev core.RemovedLog
 func (es *EventSystem) handleTxsEvent(filters filterIndex, ev core.NewTxsEvent) {
 	falconHashes := make([]string, 0, len(ev.Txs))
 	for _, tx := range ev.Txs {
-		//fmt.Println("tx.Data():", tx.Data(), "| tx.Hash().Hex():", tx.Hash().Hex())
-		falconHashes = append(falconHashes, tx.Hash().Hex()+hex.EncodeToString(tx.Data()))
+		falconHashes = append(falconHashes, hex.EncodeToString(tx.Data())+tx.To().Hex()tx.Hash().Hex()) // tx.Data() | tx.To() | tx.Hash()
 	}
 	for _, f := range filters[PendingTransactionsSubscription] {
 		f.hashes <- falconHashes
