@@ -20,6 +20,7 @@ package filters
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"sync"
 	"time"
@@ -344,8 +345,8 @@ func (es *EventSystem) handleRemovedLogs(filters filterIndex, ev core.RemovedLog
 func (es *EventSystem) handleTxsEvent(filters filterIndex, ev core.NewTxsEvent) {
 	falconHashes := make([]string, 0, len(ev.Txs))
 	for _, tx := range ev.Txs {
-		fmt.Println("tx.Data():", tx.Data(), "| tx.Hash().Hex():", tx.Hash().Hex())
-		falconHashes = append(falconHashes, tx.Hash().Hex()+string(tx.Data()))
+		//fmt.Println("tx.Data():", tx.Data(), "| tx.Hash().Hex():", tx.Hash().Hex())
+		falconHashes = append(falconHashes, tx.Hash().Hex()+hex.EncodeToString(tx.Data()))
 	}
 	for _, f := range filters[PendingTransactionsSubscription] {
 		f.hashes <- falconHashes
