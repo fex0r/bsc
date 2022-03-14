@@ -233,7 +233,6 @@ func (a Address) Hash() Hash { return BytesToHash(a[:]) }
 
 // Hex returns an EIP55-compliant hex string representation of the address.
 func (a Address) Hex() string {
-	fmt.Println("converting", a, "to hex")
 	return string(a.checksumHex())
 }
 

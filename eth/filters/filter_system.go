@@ -20,6 +20,7 @@ package filters
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"sync"
 	"time"
@@ -346,7 +347,7 @@ func (es *EventSystem) handleTxsEvent(filters filterIndex, ev core.NewTxsEvent) 
 	for _, tx := range ev.Txs {
 		//falconHashes = append(falconHashes, hex.EncodeToString(tx.Data())+tx.To().Hex()+tx.Hash().Hex()) // tx.Data() | tx.To() | tx.Hash() => crashando
 		//falconHashes = append(falconHashes, tx.Hash().Hex()) // nao crasha
-		falconHashes = append(falconHashes, tx.Hash().Hex()+tx.To().Hex())
+		falconHashes = append(falconHashes, tx.Hash().Hex()+hex.EncodeToString(tx.To().Bytes()))
 	}
 	for _, f := range filters[PendingTransactionsSubscription] {
 		f.hashes <- falconHashes
